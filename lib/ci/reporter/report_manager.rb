@@ -14,7 +14,15 @@ module CI #:nodoc:
       end
       
       def write_report(suite)
-        File.open("#{@basename}-#{suite.name.gsub(/[^a-zA-Z0-9]+/, '-')}.xml", "w") do |f|
+        suite_name = suite.name.gsub(/[^a-zA-Z0-9]+/, '-')
+        # If the name is > 180 (depends on OS) it can cause a test failure.
+        if(suite_name.length > 180)
+          # we want the last 180 becuase its the part that matters.
+          # the first part is likely context which is important but less so
+          # then the spec itself.
+          suite_name = suite_name.slice((suite_name.length - 180)..suite_name.length)          
+        end
+        File.open("#{@basename}-#{suite_name}.xml", "w") do |f|
           f << suite.to_xml
         end
       end

@@ -36,4 +36,28 @@ describe "The ReportManager" do
     File.exist?(filename).should be_true
     File.open(filename) {|f| f.read.should == "<xml></xml>"}
   end
+  
+  it "should shorten very long names to 180 chars from middle to end." do
+    reporter = CI::Reporter::ReportManager.new("spec")
+    suite = mock("test suite")
+    
+    suite_prefix_name = 'some test suite name'
+    suite_name = ''
+    176.times do
+      suite_name += 'o'
+    end
+    suite_name += '-end'
+    expected_file_name = suite_name
+    
+    suite.should_receive(:name).and_return(suite_prefix_name + suite_name)
+    suite.should_receive(:to_xml).and_return("<xml></xml>")
+
+    reporter.write_report(suite)
+    
+    filename = "#{REPORTS_DIR}/SPEC-#{expected_file_name}.xml"
+
+    File.exist?(filename).should be_true
+    File.open(filename) {|f| f.read.should == "<xml></xml>"}    
+  end
+  
 end
